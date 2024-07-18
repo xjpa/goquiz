@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 type Question struct {
@@ -27,6 +29,12 @@ func loadQuestions(filename string) ([]Question, error) {
 	}
 
 	return questions, nil
+}
+
+func shuffleQuestions(questions []Question, r *rand.Rand) {
+	r.Shuffle(len(questions), func(i, j int) {
+		questions[i], questions[j] = questions[j], questions[i]
+	})
 }
 
 func runQuiz(questions []Question) {
@@ -57,12 +65,17 @@ func runQuiz(questions []Question) {
 func main() {
 	fmt.Println("Welcome to GoQuiz!")
 
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
 	questions, err := loadQuestions("questions.json")
 	if err != nil {
 		log.Fatal("Error loading questions:", err)
 	}
 
 	fmt.Printf("Loaded %d questions\n", len(questions))
+	fmt.Println("Shuffling questions...")
+	shuffleQuestions(questions, r)
 	fmt.Println("Let's begin the quiz!")
 	fmt.Println()
 
